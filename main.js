@@ -126,7 +126,6 @@
   var lsphs = [new Mark(sphs_material), new Mark(sphs_material)]
   objs.push(...lsphs)
   var lpoints = lsphs.map(sph => sph.position)
-  lpoints[0].x = -1; lpoints[1].x = 1
 
   var line = new THREE.Line(new THREE.Geometry, new THREE.LineBasicMaterial({color: 0x888888, linewidth: 4}))
   line.geometry.vertices.push( ...lpoints )
@@ -166,11 +165,13 @@
 
   var proj = new Mark(new THREE.MeshPhongMaterial({color: 'blue'}))
 
+  lpoints[0].x = -1; lpoints[1].x = 1
+
   three.scene.add(line, ...lsphs, arrow, point, proj)
 
   function calcArrowDir() {
 
-    vec.copy(lpoints[1].clone().sub(lpoints[0]).normalize().applyEuler(new THREE.Euler(0, Math.PI/2, 0)))
+    vec.copy(lpoints[1].clone().sub(lpoints[0]).normalize().applyEuler(new THREE.Euler(0, Math.PI/2, 0)).toFixed(10))
     arrow.setDirection(vec)
 
   }
@@ -180,11 +181,19 @@
     var p1 = lpoints[0]
     var p2 = lpoints[1]
     var p3 = point.position
-    var p4 = p3.clone().add(vec.clone().multiplyScalar(10))
+    var p4 = p3.clone().add(vec.clone().multiplyScalar(10000))
 
-    var pos = _Math.linesCrossPoint2(p1, p2, p3, p4, 'x', 'z')
+    var pos = _Math.lineCross2(
+      new THREE.Line3(p1, p2), 
+      new THREE.Line3(p3, p4), 
+      'x', 'z'
+    )
 
-    proj.position.copy(pos)
+    proj.visible = !!pos
+
+    if(pos) {
+      proj.position.copy(pos)
+    }
 
   }
 
